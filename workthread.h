@@ -3,9 +3,10 @@
 
 #include <QThread>
 #include <QDebug>
-#include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlQuery>
+//#include <QtSql/QSqlDatabase>
+#include <QtSql>
+#include <QtNetwork/QtNetwork>
+#include <QList>
 
 class WorkThread : public QThread
 {
@@ -15,18 +16,28 @@ public:
     ~WorkThread();
     void run();
 signals:
-    void dbOpenSiganl();
     void threadStopSignal();
+    void messageBack(QString msg,QString color);
 public slots:
     void startThread();
     void stopThread();
+    void dataProcessing();
+    //void acceptConnect();
+    void setDB(QSqlDatabase &inDB);
+    bool setClient(QTcpSocket *inClient);
 
 private:
     bool runFlag;
     QSqlDatabase db;
-    QString userName;
-    QString userPassword;
-    QString mysqlIp;
+    QTcpSocket *client;
+
+   QString receiveTime;
+   QString NH3;
+   QString CO2;
+   QString temperature;
+   QString humidity;
+public:
+   int msgcount;
 };
 
 #endif // WORKTHREAD_H
