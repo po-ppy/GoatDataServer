@@ -170,9 +170,21 @@ void MainWindow::acceptConnect(){
 
 void MainWindow::initSQL(){
     //stopServer();
-/*    QString sqlFilePath =  QCoreApplication::applicationDirPath() + "/SQL/init.sql";
-    qDebug() << sqlFilePath;
-    QSqlQuery query(db);
-    query.exec("source " + sqlFilePath + ";")*/;
+    QString cmd = QString("mysql -u%1 -p%2 -h%3").arg(ui->serverUser->text().trimmed(),ui->serverPassword->text(),ui->serverIp->text().trimmed());
+    QString sqlFilePath = QString("%1/SQL/init.sql").arg(QCoreApplication::applicationDirPath());
+    QProcess *poc = new QProcess();
+    poc->setStandardInputFile(sqlFilePath);
+    poc->start(cmd);
+//    qDebug() << sqlFilePath;
+//    if(!db.open()){
+
+//    }
+//    QSqlQuery query(db);
+//    if(!query.exec(sqlFilePath)){
+//        QSqlError err;
+//      err= query.lastError();
+//       qDebug() << err.text();
+//        qDebug() << "error source";
+//    }
 
 }
