@@ -175,6 +175,9 @@ void MainWindow::initSQL(){
     QProcess *poc = new QProcess();
     poc->setStandardInputFile(sqlFilePath);
     poc->start(cmd);
+    if(!poc->isOpen()){
+        //清除失败
+    }
 //    qDebug() << sqlFilePath;
 //    if(!db.open()){
 
