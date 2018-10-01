@@ -7,6 +7,7 @@
 #include <QtSql>
 #include <QtNetwork/QtNetwork>
 #include <QList>
+#include <dataporcessingthread.h>
 
 class WorkThread : public QThread
 {
