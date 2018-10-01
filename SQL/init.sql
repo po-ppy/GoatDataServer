@@ -84,5 +84,6 @@ end||
 
 
 delimiter ;
-create view sportDataView as select a.goatId,a.datatimem,a.sportx,a.sporty,a.sportz,a.anglex,a.angely,anglez,a.status,b.houseId from sportData a left join goatInfo b on a.goatId = b.goatId where datatimem in (select max(datatimem) from sportData);
+#create view sportDataView as select a.goatId,a.datatimem,a.sportx,a.sporty,a.sportz,a.anglex,a.angley,anglez,a.status,b.houseId from sportData a left join goatInfo b on a.goatId = b.goatId where datatimem in (select max(datatimem) from sportData);
+create view sportDataView as select a.id,a.goatId,a.datatimem,a.sportx,a.sporty,a.sportz,a.status,b.houseId from sportData a left join goatInfo b on a.goatId = b.goatId where a.id in (select max(id) from sportData group by goatId );
 create view houseDataView as select * from houseData where datatimem in (select max(datatimem) from houseData);
