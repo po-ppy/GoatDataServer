@@ -7,6 +7,8 @@
 #include <QtSql>
 #include <QtNetwork/QtNetwork>
 #include <QList>
+#include <QtConcurrent/QtConcurrent>
+#include <QFuture>
 #include <dataporcessingthread.h>
 
 class WorkThread : public QThread
@@ -26,6 +28,7 @@ public slots:
     //void acceptConnect();
     void setDB(QSqlDatabase &inDB);
     bool setClient(QTcpSocket *inClient);
+    void testData(QList<QByteArray> todoList,QSqlDatabase &inDB);
 
 private:
     bool runFlag;
@@ -39,6 +42,7 @@ private:
    QString humidity;
 public:
    int msgcount;
+   QThread wthread;
 };
 
 #endif // WORKTHREAD_H

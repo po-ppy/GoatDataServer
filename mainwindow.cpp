@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->initAction,SIGNAL(triggered(bool)),this,SLOT(initSQL()));
     connect(server,SIGNAL(newConnection()),this,SLOT(acceptConnect()));
 
+
 }
 
 MainWindow::~MainWindow()
@@ -73,7 +74,10 @@ void MainWindow::startServer(){
             messageShow("服务正在运行","green");
             runFlag = true;
             for(int i = 0;i < threadList->size();i++){
+                threadList->at(i)->setDB(db);
                 threadList->at(i)->startThread();
+                threadList->at(i)->moveToThread(&wthread);
+                wthread.start();
             }
         }else{
             //监听服务未开启
@@ -162,8 +166,11 @@ void MainWindow::acceptConnect(){
     if(tempThread->setClient(client)){
         threadList->append(tempThread);
     }
-    if(runFlag){
+    if(runFlag){  
+        tempThread->setDB(db);
         tempThread->startThread();
+        tempThread->moveToThread(&wthread);
+        wthread.start();
     }
 
 }

@@ -3,6 +3,7 @@
 DataPorcessingThread::DataPorcessingThread(QList<QByteArray> inList)
 {
     todoList = inList;
+    moveToThread(this);
 }
 
 DataPorcessingThread::~DataPorcessingThread(){
@@ -13,6 +14,7 @@ DataPorcessingThread::~DataPorcessingThread(){
 void DataPorcessingThread::run(){
     QTime time;
     time.start();
+    qDebug() << QThread::currentThread()->objectName() << "  start";
     QString receiveTime = "";
     QString temperature = "";
     QString humidity = "";
@@ -114,6 +116,6 @@ void DataPorcessingThread::run(){
             }
         }
     }
-
+    qDebug() << QThread::currentThread()->objectName() << "  stop";
     qDebug() << time.elapsed()/1000.0 << "s";
 }

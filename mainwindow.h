@@ -57,6 +57,7 @@ private:
     QTcpServer *server;
     QList<QTcpSocket *> *clientList;
     QList<WorkThread *> *threadList;
+    QThread wthread;
 };
 
 #endif // MAINWINDOW_H
