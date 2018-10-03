@@ -3,7 +3,12 @@
 DataPorcessingThread::DataPorcessingThread(QList<QByteArray> inList)
 {
     todoList = inList;
-    moveToThread(this);
+    //moveToThread(this);
+}
+
+DataPorcessingThread::DataPorcessingThread(QList<QByteArray> inList, QSqlDatabase &inDB){
+    todoList = inList;
+    db = inDB;
 }
 
 DataPorcessingThread::~DataPorcessingThread(){
@@ -11,6 +16,9 @@ DataPorcessingThread::~DataPorcessingThread(){
     wait();
 }
 
+void DataPorcessingThread::setDB(QSqlDatabase &inDB){
+    db = inDB;
+}
 void DataPorcessingThread::run(){
     QTime time;
     time.start();
@@ -19,7 +27,8 @@ void DataPorcessingThread::run(){
     QString temperature = "";
     QString humidity = "";
     int msgcount = 0;
-    QSqlQuery query;
+    db.open();
+    QSqlQuery query(db);
 
     for(int i = 0;i<todoList.length();i++){
         QList<QByteArray> datalist = todoList.at(i).split('*');
@@ -79,7 +88,7 @@ void DataPorcessingThread::run(){
                          qDebug() << err.text();
                     }else{
                         //if(i == goats.size()-1){
-                        if(msgcount == 5){
+                        if(msgcount == todoList.length()/2){
                             //QString temp = receiveTime+"#"+temperature+"#"+humidity;
                             //QString temp = receiveTime+"#"+"23.4"+"#"+"45.6";
                             //qDebug() << temp;

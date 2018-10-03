@@ -25,6 +25,8 @@ public slots:
     void startThread();
     void stopThread();
     void dataProcessing();
+    void dataProcessing2();
+    void dataProcessing3();
     //void acceptConnect();
     void setDB(QSqlDatabase &inDB);
     bool setClient(QTcpSocket *inClient);

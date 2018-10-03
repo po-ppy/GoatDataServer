@@ -22,14 +22,14 @@ void WorkThread::run(){
 
 void WorkThread::startThread(){
     runFlag = true;
-    connect(client,SIGNAL(readyRead()),this,SLOT(dataProcessing()));
+    connect(client,SIGNAL(readyRead()),this,SLOT(dataProcessing3()));
     this->start();
 }
 
 void WorkThread::stopThread(){
     //qDebug() << "stop ???";
     runFlag = false;
-    disconnect(client,SIGNAL(readyRead()),this,SLOT(dataProcessing()));
+    disconnect(client,SIGNAL(readyRead()),this,SLOT(dataProcessing3()));
     this->quit();
     this->wait();
 }
@@ -50,37 +50,19 @@ void WorkThread::dataProcessing(){
         qDebug() << allLength;
         int len = 0;
         while(len+5 < allLength){
-            //DataPorcessingThread tempThread(tempDataList.mid(len,len+10));
+            DataPorcessingThread tempThread(tempDataList.mid(len,5));
             len += 5;
-            //tempThread.setObjectName(QString::number(len));
-            //tempThread.start();
-            //extern void testData( QList<QByteArray> todoList);
-            QtConcurrent::run(this,&WorkThread::testData,tempDataList.mid(len,5),QSqlDatabase::cloneDatabase(this->db,QString::number(QDateTime::currentMSecsSinceEpoch()+len)));
-            sleep(1);
+            tempThread.setObjectName(QString::number(len));
+            tempThread.setDB(this->db);
+            tempThread.moveToThread(&wthread);
+            tempThread.start();
         }
-        sleep(1);
-        //DataPorcessingThread tempThread(tempDataList.mid(len));
-        //tempThread.setObjectName(QString::number(len));
-        //tempThread.start();
-        //extern void testData(QList<QByteArray> todoList);
-        QtConcurrent::run(this,&WorkThread::testData,tempDataList.mid(len),QSqlDatabase::cloneDatabase(this->db,QString::number(QDateTime::currentMSecsSinceEpoch()+len))).waitForFinished();
-        //void someFunction(int arg1, double arg2);
-
-        //tempThread.moveToThread(this);
-//        if(tempDataList.length() < 11){
-//            DataPorcessingThread tempThread(tempDataList);
-//            tempThread.start();
-//        }else{
-//            int len = tempDataList.length() / 10;
-//            for(int i = 0;i < len;i++){
-//                int startPos = i*len;
-//                if(startPos+len > tempDataList.length()){
-//                    break;
-//                }
-//                DataPorcessingThread tempThread(tempDataList.mid(i*len,len));
-//            }
-//        }
-
+        DataPorcessingThread tempThread(tempDataList.mid(len));
+        tempThread.setObjectName(QString::number(len));
+        tempThread.setDB(this->db);
+        tempThread.moveToThread(&wthread);
+        tempThread.start();
+        //wthread.start();
 
 //        for(int i = 0;i < tempDataList.length();i++){
 //            QList<QByteArray> datalist = tempDataList.at(i).split('*');
@@ -181,6 +163,56 @@ void WorkThread::dataProcessing(){
    // }
 }
 
+void WorkThread::dataProcessing2(){
+    // 数据处理
+     //qDebug() << "inter!!";
+     QByteArray receiveInfo = client->readAll().trimmed().replace("\n","").replace('\x01',"");
+     //qDebug() << "is there nothing?";
+     //qDebug() << receiveInfo;
+     QList<QByteArray> tempDataList = receiveInfo.split('$');
+     tempDataList.removeAll(" ");
+     tempDataList.removeAll("");
+     int allLength = tempDataList.length();
+     qDebug() << allLength;
+     int len = 0;
+     while(len+5 < allLength){
+         DataPorcessingThread tempThread(tempDataList.mid(len,5));
+         len += 5;
+         tempThread.setObjectName(QString::number(len));
+         tempThread.setDB(this->db);
+         tempThread.start();
+     }
+     DataPorcessingThread tempThread(tempDataList.mid(len));
+     tempThread.setObjectName(QString::number(len));
+     tempThread.setDB(this->db);
+     tempThread.start();
+}
+
+void WorkThread::dataProcessing3(){
+   // msleep(800);
+    QTime tempTime;
+    tempTime.start();
+    // 数据处理
+     //qDebug() << "inter!!";
+     QByteArray receiveInfo = client->readAll().trimmed().replace("\n","").replace('\x01',"");
+     //qDebug() << "is there nothing?";
+     //qDebug() << receiveInfo;
+     QList<QByteArray> tempDataList = receiveInfo.split('$');
+     tempDataList.removeAll(" ");
+     tempDataList.removeAll("");
+     int allLength = tempDataList.length();
+     qDebug() << allLength;
+     int len = 0;
+     while(len+5 < allLength){
+
+         QtConcurrent::run(this,&WorkThread::testData,tempDataList.mid(len,5),QSqlDatabase::cloneDatabase(this->db,QString::number(QDateTime::currentMSecsSinceEpoch()+tempTime.elapsed())));
+         //QtConcurrent::run(this,&WorkThread::testData,tempDataList.mid(len,5),this->db);
+         msleep(5);
+     }
+     QtConcurrent::run(this,&WorkThread::testData,tempDataList.mid(len),QSqlDatabase::cloneDatabase(this->db,QString::number(QDateTime::currentMSecsSinceEpoch()+tempTime.elapsed())));
+     //QtConcurrent::run(this,&WorkThread::testData,tempDataList.mid(len),this->db);
+}
+
 void WorkThread::setDB(QSqlDatabase &inDB){
     this->db = inDB;
 }
@@ -194,14 +226,17 @@ bool WorkThread::setClient(QTcpSocket *inClient){
 void WorkThread::testData(QList<QByteArray> todoList,QSqlDatabase &inDB){
     QTime time;
     time.start();
-    qDebug() << QThread::currentThreadId();
+    qDebug() << QThread::currentThreadId() << " start";
     //qDebug() << QThread::currentThread()->objectName() << "  start";
     QString receiveTime = "";
     QString temperature = "";
     QString humidity = "";
     int msgcount = 0;
-    inDB.open();
+    if(inDB.open()){
+        inDB.transaction();
+    }
     QSqlQuery query(inDB);
+
 
     for(int i = 0;i<todoList.length();i++){
         QList<QByteArray> datalist = todoList.at(i).split('*');
@@ -261,7 +296,7 @@ void WorkThread::testData(QList<QByteArray> todoList,QSqlDatabase &inDB){
                          qDebug() << err.text();
                     }else{
                         //if(i == goats.size()-1){
-                        if(msgcount == 5){
+                        if(msgcount == todoList.length()/2){
                             //QString temp = receiveTime+"#"+temperature+"#"+humidity;
                             //QString temp = receiveTime+"#"+"23.4"+"#"+"45.6";
                             //qDebug() << temp;
@@ -285,11 +320,11 @@ void WorkThread::testData(QList<QByteArray> todoList,QSqlDatabase &inDB){
                 }
 
             }
-                if(msgcount == 5){
+               if(msgcount == 5){
                     msgcount = 0;
-                }else{
+               }else{
                     msgcount++;
-                }
+               }
 
                 break;
             default:
@@ -299,8 +334,11 @@ void WorkThread::testData(QList<QByteArray> todoList,QSqlDatabase &inDB){
         }
     }
     //qDebug() << QThread::currentThread()->objectName() << "  stop";
+    if(!inDB.commit()){
+        inDB.rollback();
+    }
     inDB.close();
-    qDebug() << time.elapsed()/1000.0 << "s";
+    qDebug() << QThread::currentThreadId() << time.elapsed()/1000.0 << "s stop";
 }
 
 
