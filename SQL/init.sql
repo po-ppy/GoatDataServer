@@ -69,6 +69,8 @@ begin
   set @tempGoatId = (select goatId from bindingInfo where deviceId = NEW.goatId);
   if(@tempGoatId is not null) then
     set NEW.goatId = @tempGoatId;
+  elseif not exists(select deviceId from deviceInfo where deviceId = NEW.goatId) then
+    insert into deviceInfo(deviceId,deviceState,inTime) values(NEW.goatId,'闲置',now());
   end if;
 end||
 
@@ -82,9 +84,8 @@ begin
   end if;
 end||
 
-
 delimiter ;
-#create view sportDataView as select a.goatId,a.datatimem,a.sportx,a.sporty,a.sportz,a.anglex,a.angley,anglez,a.status,b.houseId from sportData a left join goatInfo b on a.goatId = b.goatId where datatimem in (select max(datatimem) from sportData);
+
 create view tempsportDataView as select a.id,a.goatId,a.datatimem,a.sportx,a.sporty,a.sportz,a.status,b.houseId from sportData a left join goatInfo b on a.goatId = b.goatId where a.datatimem in (select max(datatimem) from sportData group by goatId );
 create view houseDataView as select * from houseData where datatimem in (select max(datatimem) from houseData);
 create view maxDatatimemView as select goatId,max(datatimem) as datatimem from tempsportDataView group by goatId;
