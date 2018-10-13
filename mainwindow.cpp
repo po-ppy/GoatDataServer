@@ -24,11 +24,6 @@ MainWindow::MainWindow(QWidget *parent) :
     mSysTrayIcon->setContextMenu(cmenu);
     mSysTrayIcon->show();
 
-
-
-//    connect(server,SIGNAL(newConnection()),this,SLOT(acceptConnect()));
-//    connect(this,SIGNAL(startSignal(QString)),workThread,SLOT(startThread(QString)));
-//    connect(this,SIGNAL(stopSignal()),workThread,SLOT(stopThread()));
     connect(mSysTrayIcon,SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,SLOT(activedSysTrayIcon(QSystemTrayIcon::ActivationReason)));
 
     connect(showAction,SIGNAL(triggered(bool)),this,SLOT(showWindow()));
@@ -57,7 +52,6 @@ void MainWindow::on_closeButton_clicked()
 }
 
 void MainWindow::startServer(){
-    //emit startSignal(ui->serverIp->text().trimmed() + "$*$" +ui->serverUser->text().trimmed() + "$*$" + ui->serverPassword->text());
     if(db.isOpen()){
         db.close();
     }

@@ -194,7 +194,7 @@ void WorkThread::dataProcessing3(){
     tempTime.start();
     // 数据处理
      //qDebug() << "inter!!";
-     QByteArray receiveInfo = client->readAll().trimmed().replace("\n","").replace('\x01',"");
+     QByteArray receiveInfo = client->readAll().trimmed().replace("\n","").replace("\x01","");
      //qDebug() << "is there nothing?";
      //qDebug() << receiveInfo;
      QList<QByteArray> tempDataList = receiveInfo.split('$');
@@ -288,6 +288,7 @@ void WorkThread::testData(QList<QByteArray> todoList,QSqlDatabase &inDB){
                             // qDebug() << j;
                         }
                     }
+                    qDebug() << tempgoat.at(6);
                     if(!query.exec()){
                          qDebug() << "数据库插入失败！";
                         qDebug() << query.lastQuery();
