@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     cmenu->addSeparator();
     exitAction = cmenu->addAction("退出");
 
-    mSysTrayIcon->setIcon(QIcon(":/nu.png"));
+    mSysTrayIcon->setIcon(QIcon(":/yang.png"));
     mSysTrayIcon->setToolTip("运动分析服务");
     mSysTrayIcon->setContextMenu(cmenu);
     mSysTrayIcon->show();
@@ -60,6 +60,8 @@ void MainWindow::startServer(){
     db.setPassword(ui->serverPassword->text());
     db.setDatabaseName("goatdb");
     if(db.open()){
+        QNetworkProxy proxy;
+        QNetworkProxy::setApplicationProxy(proxy);
         quint16 port=8888;//端口号！！！！！！！！
         server->listen(QHostAddress::Any,port);
         if(server->isListening()){
@@ -76,6 +78,7 @@ void MainWindow::startServer(){
         }else{
             //监听服务未开启
             messageShow("监听服务启动失败，请检查8888端口是否占用","red");
+            qDebug() << server->errorString();
         }
 
     }else{

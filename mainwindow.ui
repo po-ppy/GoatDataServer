@@ -18,6 +18,11 @@
   <property name="windowTitle">
    <string>运动数据分析服务</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normalon>:/yang.png</normalon>
+   </iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>

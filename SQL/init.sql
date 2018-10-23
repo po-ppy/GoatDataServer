@@ -16,7 +16,9 @@ create table routerInfo(id int primary key auto_increment,deviceId varchar(40) n
 #运动数据表
 create table sportData(id int primary key auto_increment,goatId varchar(40) not null,datatimem varchar(20) not null,sportx varchar(20) not null,sporty varchar(20) not null, sportz varchar(20) not null,anglex varchar(20),angley varchar(20),anglez varchar(20),status varchar(40));
 #羊舍数据表
-create table houseData(id int primary Key auto_increment,houseId varchar(100) not null,datatimem varchar(20) not null,wendu varchar(20),anqi varchar(20),shidu varchar(20),eryang varchar(20));
+#create table houseData(id int primary Key auto_increment,houseId varchar(100) not null,datatimem varchar(20) not null,wendu varchar(20),anqi varchar(20),shidu varchar(20),eryang varchar(20));
+create table houseData(datatimem varchar(20) not null,houseId varchar(100) not null,wendu varchar(20),anqi varchar(20),shidu varchar(20),eryang varchar(20), primary key(datatimem,houseId));
+
 #外键约束
 alter table goatInfo add constraint fk_houseId foreign key(houseId) references houseInfo(houseId) on delete cascade on update cascade;
 alter table bindingInfo add constraint fk_goatId foreign key(goatId) references goatInfo(goatId) on delete cascade on update cascade;
@@ -67,10 +69,18 @@ create trigger bf_insert_sportData before insert
 on sportData for each row
 begin
   set @tempGoatId = (select goatId from bindingInfo where deviceId = NEW.goatId);
+  set @gg = sqrt(power(NEW.sportx,2)+power(NEW.sporty,2)+power(NEW.sportz,2))/17884*9.8;
   if(@tempGoatId is not null) then
     set NEW.goatId = @tempGoatId;
   elseif not exists(select deviceId from deviceInfo where deviceId = NEW.goatId) then
     insert into deviceInfo(deviceId,deviceState,inTime) values(NEW.goatId,'闲置',now());
+  end if;
+   if @gg >= 15 then
+	set NEW.status = '奔跑';
+  elseif @gg >= 10.4 then
+	set NEW.status = '缓步';
+  else
+	set NEW.status = '静止';
   end if;
 end||
 
@@ -82,11 +92,20 @@ begin
   if(@tempGoatId is not null) then
     set NEW.houseId = @tempHouseId;
   end if;
+ 
+	
 end||
 
 delimiter ;
-
-create view tempsportDataView as select a.id,a.goatId,a.datatimem,a.sportx,a.sporty,a.sportz,a.status,b.houseId from sportData a left join goatInfo b on a.goatId = b.goatId where a.datatimem in (select max(datatimem) from sportData group by goatId );
+alter table sportData add index(datatimem);
+#alter table houseData add index(datatimem);
+create view tempsportDataView as select a.id,a.goatId,a.datatimem,a.sportx,a.sporty,a.sportz,a.status,b.houseId from sportData a left join goatInfo b on a.goatId = b.goatId where a.datatimem in (select distinct max(datatimem) from sportData);
 create view houseDataView as select * from houseData where datatimem in (select max(datatimem) from houseData);
 create view maxDatatimemView as select goatId,max(datatimem) as datatimem from tempsportDataView group by goatId;
 create view sportDataView as select a.goatId,a.datatimem,b.sportx,b.sporty,b.sportz,b.status,b.houseId from maxDatatimemView a left join tempsportDataView b on a.goatId = b.goatId and a.datatimem = b.datatimem;
+
+#create view tempsportDataView as select a.id,a.goatId,a.datatimem,a.sportx,a.sporty,a.sportz,a.status,b.houseId from sportData a left join goatInfo b on a.goatId = b.goatId where a.datatimem in (select max(datatimem) from sportData group by goatId );
+#create view houseDataView as select * from houseData where datatimem in (select max(datatimem) from houseData);
+#create view maxDatatimemView as select goatId,max(datatimem) as datatimem from tempsportDataView group by goatId;
+#create view sportDataView as select a.goatId,a.datatimem,b.sportx,b.sporty,b.sportz,b.status,b.houseId from maxDatatimemView a left join tempsportDataView b on a.goatId = b.goatId and a.datatimem = b.datatimem;
+#

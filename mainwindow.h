@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QDebug>
 #include <QSystemTrayIcon>
-#include <QSql>
 #include <QIcon>
 #include <QMenu>
 #include <QAction>
@@ -12,6 +11,7 @@
 #include <QtNetwork/QtNetwork>
 #include <QList>
 #include <QFile>
+#include <QNetworkProxy>
 
 namespace Ui {
 class MainWindow;

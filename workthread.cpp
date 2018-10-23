@@ -288,7 +288,7 @@ void WorkThread::testData(QList<QByteArray> todoList,QSqlDatabase &inDB){
                             // qDebug() << j;
                         }
                     }
-                    qDebug() << tempgoat.at(6);
+                    //qDebug() << tempgoat.at(6);
                     if(!query.exec()){
                          qDebug() << "数据库插入失败！";
                         qDebug() << query.lastQuery();
